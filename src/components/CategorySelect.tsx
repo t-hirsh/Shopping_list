@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from '../redux/store';
 import { loadCategories, setSelectedCategory } from '../redux/categorySlice';
-import { useDispatch, useSelector } from '../../src/redux/store'
-import { RootState } from '../redux/store';
+import { FormControl, InputLabel, Select, MenuItem, CircularProgress, FormHelperText } from '@mui/material';
+
 const CategorySelect: React.FC = () => {
     const dispatch = useDispatch();
-    const categories: string[] = useSelector((state: RootState) => state.categories.items);
-    const status: string = useSelector((state: RootState) => state.categories.status);
+    const { items: categories, status, selectedCategory, error } = useSelector((state) => state.categories);
 
     useEffect(() => {
         if (status === 'idle') {
@@ -13,19 +13,32 @@ const CategorySelect: React.FC = () => {
         }
     }, [status, dispatch]);
 
-    const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        dispatch(setSelectedCategory(event.target.value));
+    const handleChange = (event: any) => {
+        dispatch(setSelectedCategory(event.target.value as string));
     };
 
     return (
-        <select onChange={handleChange}>
-            <option value="">בחר קטגוריה</option>
-            {categories.map((category: string) => (
-                <option key={category} value={category}>
-                    {category}
-                </option>
-            ))}
-        </select>
+        <FormControl fullWidth sx={{ mb: 2 }} error={status === 'failed'}>
+            <InputLabel id="category-select-label">קטגוריה</InputLabel>
+            <Select
+                labelId="category-select-label"
+                value={selectedCategory}
+                label="קטגוריה"
+                onChange={handleChange}
+                disabled={status === 'loading'}
+                startAdornment={status === 'loading' ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
+            >
+                <MenuItem value="" disabled>
+                    <em>בחר קטגוריה</em>
+                </MenuItem>
+                {categories.map((category) => (
+                    <MenuItem key={category} value={category}>
+                        {category}
+                    </MenuItem>
+                ))}
+            </Select>
+            {status === 'failed' && <FormHelperText>{error || 'שגיאה בטעינת הקטגוריות'}</FormHelperText>}
+        </FormControl>
     );
 };
 
