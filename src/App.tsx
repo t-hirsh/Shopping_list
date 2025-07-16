@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Provider, useSelector } from 'react-redux';
 import  store from '../src/redux/store';
+import { RootState } from '../src/redux/store'; 
 
 import { Container, Paper, Typography, CssBaseline, Box } from '@mui/material';
 
@@ -13,7 +14,7 @@ const ShoppingListApp: React.FC = () => {
     const [productName, setProductName] = useState<string>('');
     const [items, setItems] = useState<Item[]>([]);
    
-    const selectedCategory = useSelector((state) => state.categories.selectedCategory);
+    const selectedCategory = useSelector((state: RootState) => state.categories.selectedCategory);
 
     const handleAddItem = () => {
         if (productName.trim() && selectedCategory) {

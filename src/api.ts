@@ -1,11 +1,14 @@
-
 import axios from 'axios';
 
 export const fetchCategories = async (): Promise<string[]> => {
     try {
         const response = await axios.get('http://localhost:6868/categories');
-        return response.data;
-    } catch (error) {
+        return response.data.slice(1, -2).map((item: unknown) => {
+            if (typeof item === 'object' && item !== null && 'name' in item) {
+                return (item as { name: string }).name;
+            }
+            return ''; 
+        });    } catch (error) {
         throw new Error('Network response was not ok');
     }
 };
