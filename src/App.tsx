@@ -1,45 +1,35 @@
-import React, { useState } from 'react';
-import { Provider, useSelector } from 'react-redux';
-import  store from '../src/redux/store';
-import { RootState } from '../src/redux/store'; 
-
+import React from 'react';
+import { Provider } from 'react-redux';
+import store from '../src/redux/store';
+import { RootState } from './redux/store';
+import { useSelector, useDispatch } from 'react-redux';
 import { Container, Paper, Typography, CssBaseline, Box } from '@mui/material';
-
+import { addItem, removeItem } from './redux/cartSlice';
 import ItemInput from './components/ItemInput';
-import ItemList, { Item } from './components/ItemList';
-import CheckoutButton from './components/CheckoutButton';
+import ItemList from './components/ItemList';
 import CategorySelect from './components/CategorySelect';
+import CheckoutButton from './components/CheckoutButton';
 
 const ShoppingListApp: React.FC = () => {
-    const [productName, setProductName] = useState<string>('');
-    const [items, setItems] = useState<Item[]>([]);
-   
+    const dispatch = useDispatch();
     const selectedCategory = useSelector((state: RootState) => state.categories.selectedCategory);
+    const items = useSelector((state: RootState) => state.cart.items || []);
 
-    const handleAddItem = () => {
+    const handleAddItem = (productName: string, quantity: number) => {
         if (productName.trim() && selectedCategory) {
-            const newItem: Item = {
-                id: new Date().getTime().toString(), 
+            dispatch(addItem({
                 name: productName.trim(),
-                category: selectedCategory
-            };
-            setItems([...items, newItem]);
-            setProductName(''); 
+                category: selectedCategory,
+                quantity
+            }));
         }
     };
 
     const handleRemoveItem = (idToRemove: string) => {
-        setItems(items.filter(item => item.id !== idToRemove));
+        dispatch(removeItem({ id: idToRemove })); 
     };
 
-    const handleCheckout = () => {
-        if (items.length > 0) {
-            alert(`ההזמנה הושלמה עם ${items.length} מוצרים!`);
-            setItems([]); 
-        }
-    };
-
-    const isAddDisabled = !productName.trim() || !selectedCategory;
+    const isAddDisabled = !selectedCategory;
 
     return (
         <Container component="main" maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
@@ -47,26 +37,20 @@ const ShoppingListApp: React.FC = () => {
                 <Typography variant="h4" component="h1" align="center" gutterBottom>
                     🛒 רשימת קניות
                 </Typography>
-               
+
                 <Box component="section" sx={{ mb: 3 }}>
                     <CategorySelect />
                     <ItemInput
-                        productName={productName}
-                        setProductName={setProductName}
                         handleAddItem={handleAddItem}
-                        isAddDisabled={isAddDisabled}
                     />
                 </Box>
 
                 <Box component="section">
                     <ItemList items={items} handleRemoveItem={handleRemoveItem} />
                 </Box>
-               
+
                 <Box component="section" sx={{ mt: 'auto' }}>
-                    <CheckoutButton
-                        handleCheckout={handleCheckout}
-                        isDisabled={items.length === 0}
-                    />
+                <CheckoutButton cart={items} />
                 </Box>
             </Paper>
         </Container>

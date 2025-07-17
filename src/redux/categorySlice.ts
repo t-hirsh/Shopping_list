@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchCategories } from '../api';
+import { getCategories } from '../axios';
 
 interface CategoryState {
     items: string[];
@@ -16,7 +16,7 @@ const initialState: CategoryState = {
 };
 
 export const loadCategories = createAsyncThunk('categories', async () => {
-    const categories = await fetchCategories();
+    const categories = await getCategories();
     return categories;
 });
 

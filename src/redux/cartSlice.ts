@@ -1,36 +1,58 @@
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-interface Item {
+export interface Item {
+  id: string;
   name: string;
   category: string;
   quantity: number;
 }
 
 interface CartState {
-  items: Item[];
+  [category: string]: Item[]; 
 }
 
-const initialState: CartState = {
-  items: [],
-};
+const initialState: CartState = {};
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addItem: (state, action: PayloadAction<Item>) => {
-      const existingItem = state.items.find(item => item.name === action.payload.name);
+    addItem: (state, action: PayloadAction<{ name: string; category: string; quantity: number }>) => {
+      
+      const { name, category, quantity } = action.payload;      
+      const id = new Date().toISOString(); 
+
+      if (!state[category]) {        
+        state[category] = []; 
+      }
+
+      const existingItem = state[category].find(item => item.name === name);
+      
       if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
+        
+        existingItem.quantity += quantity; 
       } else {
-        state.items.push(action.payload);
+        
+        state[category].push({ id, name, category, quantity }); 
       }
     },
+    removeItem: (state, action: PayloadAction<{ id: string;  }>) => {
+      const { id } = action.payload;
+      const itemExists = Object.values(state).some(categoryItems => 
+        categoryItems.some(item => item.id === id)
+    );
+    if (itemExists) {
+        Object.keys(state).forEach(category => {
+            state[category] = state[category].filter(item => item.id !== id);
+        });
+    }
+    },
     clearCart: (state) => {
-      state.items = [];
+      return {}; 
     },
   },
 });
 
-export const { addItem, clearCart } = cartSlice.actions;
+export const { addItem, removeItem, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
